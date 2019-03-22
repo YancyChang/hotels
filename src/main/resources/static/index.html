@@ -1,0 +1,132 @@
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Hotel</title>
+    <link rel="stylesheet" href="layui/css/layui.css">
+</head>
+<body style="background-color: #b2b2b2">
+<script src="layui/layui.js" charset="utf-8"></script>
+<script>
+
+    //在输入框按enter键直接搜索
+    function keySearch(){
+        // 13为回车键
+        if (event.keyCode==13){
+            var hotelname = document.getElementById('hotelname').value.trim();
+            var sort = document.getElementById('sort').value;
+            var table= layui.table;
+            table.reload("test", {where: {hotelname:hotelname,sort:sort}});
+            document.getElementById('hotelname').value=hotelname;
+            document.getElementById('sort').value = sort;
+        }
+    }
+
+    //layui的数据表格渲染
+    layui.use('table', function(){
+        var table = layui.table;
+        table.render({
+            elem: '#test',
+            url:'/hotel/table',
+            page: true,
+            toolbar: '#toolbarDemo',
+            cols: [[
+                {field:'id', width:80, title: 'ID', sort: true,hide:true},
+                {field:'hotelName', width:400, title: '酒店名称'},
+                {field:'score', width:150, title: '酒店评分', sort: true},
+                {field:'price', width:150, title: '价格', sort: true},
+                {field:'location',width:600, title: '酒店地址', minWidth: 400},
+                {field:'pictureLink', title: '操作', minWidth: 500,toolbar: '#barDemo'}
+            ]]
+        });
+
+        //头工具栏事件
+        table.on('toolbar(test)', function(obj){
+            if(obj.event === 'search'){
+                var hotelname = document.getElementById('hotelname').value.trim();
+                var sort = document.getElementById('sort').value;
+                var table= layui.table;
+                table.reload("test", {where: {hotelname:hotelname,sort:sort}});
+                document.getElementById('hotelname').value=hotelname;
+                document.getElementById('sort').value = sort;
+            }
+        });
+
+
+        //监听行工具事件
+        table.on('tool(test)', function(obj){
+            var data = obj.data;
+            //console.log(obj)
+            if(obj.event === 'pic'){
+                layer.confirm('确定要查看图片吗？', function(index){
+                    layer.close(index);
+                    var pic = JSON.stringify(obj.data['pictureLink']).replace("\"","").replace("\"","").trim();
+                    if (pic != null && pic != ''){
+                        window.open(pic);
+                    } else {
+                        layer.confirm('未找到照片！', function(index){
+                            layer.close(index);
+                        });
+                    }
+                });
+            } else if(obj.event === 'detail'){
+                layer.confirm('确定要跳转吗？', function(index){
+                    layer.close(index);
+                    var pic = JSON.stringify(obj.data['link']).replace("\"","").replace("\"","").trim();
+                    if (pic!= null  && pic != ''){
+                        window.open(pic);
+                    } else {
+                        layer.confirm('未找到网址！', function(index){
+                            layer.close(index);
+                        });
+                    }
+                });
+            }
+        });
+    });
+
+</script>
+
+<h1 style="text-align: center;margin-top: 30px">酒 店 数 据 展 示</h1>
+<div style="margin-left: 50px;margin-right: 50px;margin-top: 20px">
+
+    <script type="text/html" id="toolbarDemo">
+        <div class="layui-container">
+            <div class="layui-form-item" style="text-align: left">
+                <div class="layui-inline">
+                    <label class="layui-form-label">酒店：</label>
+                    <div class="layui-input-inline">
+                        <input type="text" list="mylist" onkeydown="keySearch()" name="hotelname" id="hotelname" lay-verify="required" placeholder="请输入酒店名称！" autocomplete="off" class="layui-input">
+                        <datalist id="mylist">
+                            <option value="万达">
+                            <option value="火车站">
+                            <option value="西站">
+                            <option value="八一广场">
+                            <option value="红谷滩">
+                        </datalist>
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">排序：</label>
+                    <div class="layui-input-inline">
+                        <select name="sort" id="sort" lay-filter="sort">
+                            <option value="0">按照评分从高到低</option>
+                            <option value="1">按照评分从低到高</option>
+                            <option value="2">按照价格从高到低</option>
+                            <option value="3">按照价格从低到高</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="layui-btn" lay-event="search" id="search" style="margin-left: 30px">搜索</button>
+            </div>
+
+        </div>
+    </script>
+    <table class="layui-hide" id="test" lay-filter="test" style="margin-left: 50px"></table>
+    <script type="text/html" id="barDemo">
+        <a class="layui-btn layui-btn-xs" lay-event="pic">照片</a>
+        <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="detail">详细信息</a>
+    </script>
+</div>
+
+</body>
+</html>
